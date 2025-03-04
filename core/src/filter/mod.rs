@@ -132,6 +132,8 @@ impl Filter {
 
         let mut ptree = FlatPTree::new(&flat_patterns);
         ptree.prune_branches();
+        
+        println!("ptree: {:#?}", ptree);
 
         Ok(Filter {
             patterns: ptree.to_layered_patterns(),

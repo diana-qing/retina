@@ -17,15 +17,19 @@ pub struct FilterParser;
 impl FilterParser {
     /// Parses filter string as a disjunct of `RawPattern`s
     pub(crate) fn parse_filter(filter_raw: &str) -> Result<Vec<RawPattern>> {
+        println!("filter_raw: {}", filter_raw);
         let ast = FilterParser::parse_as_ast(filter_raw)?;
+        println!("ast: {:#?}", ast);
         Ok(FilterParser::flatten_disjunct(ast))
     }
 
     fn parse_as_ast(filter_raw: &str) -> Result<Node> {
         let pairs = FilterParser::parse(Rule::filter, filter_raw);
+        println!("pairs: {:#?}", pairs);
         match pairs {
             Ok(mut pairs) => {
                 let pair = pairs.next().unwrap();
+                println!("pair: {:#?}", pair);
                 FilterParser::parse_disjunct(pair)
             }
             Err(_) => bail!(FilterError::InvalidFormat),
@@ -41,6 +45,7 @@ impl FilterParser {
                 flat_conjuncts.append(&mut flat_conjunct)
             }
         }
+        println!("flat_conjuncts: {:#?}", flat_conjuncts);
         flat_conjuncts
     }
 
@@ -76,20 +81,23 @@ impl FilterParser {
     }
 
     fn parse_disjunct(pair: Pair<Rule>) -> Result<Node> {
-        //println!("building from expr: {:#?}", pair);
+        println!("building from expr: {:#?}", pair);
         let inner = pair.into_inner();
+        println!("parse_disjunct: inner: {:#?}", inner);
         let mut terms = vec![];
         for pair in inner {
             if let Rule::sub_expr = pair.as_rule() {
                 terms.push(FilterParser::parse_conjunct(pair)?);
             }
         }
+        println!("parse_disjunct: terms: {:#?}", terms);
         Ok(Node::Disjunct(terms))
     }
 
     fn parse_conjunct(pair: Pair<Rule>) -> Result<Node> {
-        //println!("building from disjunct: {:#?}", pair);
+        println!("building from disjunct: {:#?}", pair);
         let inner = pair.into_inner();
+        println!("parse_conjunct: inner: {:#?}", inner);
         let mut terms = vec![];
         for pair in inner {
             match pair.as_rule() {
@@ -98,12 +106,23 @@ impl FilterParser {
                 _ => (),
             }
         }
+        println!("parse_conjunct: terms: {:#?}", terms);
         Ok(Node::Conjunct(terms))
     }
 
     fn parse_predicate(pair: Pair<Rule>) -> Result<Vec<Node>> {
+        println!("parse_predicate: pair: {:#?}", pair);
         let mut inner = pair.into_inner();
+        println!("parse_predicate: inner: {:#?}", inner);
+        
+        // check if there's a not operator before the protocol
+        if inner.len() > 1 {
+            let _ = inner.next();
+        }
+
         let protocol = inner.next().unwrap();
+        println!("parse_predicate: protocol: {:#?}", protocol);
+
         match inner.next() {
             Some(field) => {
                 let op = inner.next().unwrap();
@@ -163,6 +182,7 @@ impl FilterParser {
     }
 
     fn parse_protocol(pair: Pair<Rule>) -> ProtocolName {
+        println!("parse_protocol: pair: {:#?}", pair);
         protocol!(pair.as_str())
     }
 

@@ -9,7 +9,7 @@ raw_predicates = _{ SOI ~ ( (non_identifier)* ~ predicate ~ (non_identifier)* )*
 expr = { sub_expr ~ (or_op ~ sub_expr)* }
 sub_expr = { term ~ (and_op ~ term)* }
 term = _{ predicate | "(" ~ expr ~ ")" }
-predicate = { protocol ~ ("." ~ (combined_field | field) ~ bin_op ~ value)? }
+predicate = { not_op? ~ protocol ~ ("." ~ (combined_field | field) ~ bin_op ~ value)? }
 
 // Identifiers
 // ----------------------------------------------------------------------

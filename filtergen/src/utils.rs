@@ -232,6 +232,7 @@ pub(crate) fn update_body(
         let actions = node.actions.clone();
         body.push(quote! { result.push(&#actions); });
     }
+    println!("update_body: body: {:#?}", body);
     if !node.deliver.is_empty() {
         for d in &node.deliver {
             let id = &d.id;
@@ -433,18 +434,27 @@ impl ConnDataFilter {
     ) {
         let service_ident = Ident::new(&protocol.name().to_camel_case(), Span::call_site());
         let mut body: Vec<proc_macro2::TokenStream> = vec![];
-        (build_child_nodes)(&mut body, statics, node, filter_layer);
-        update_body(&mut body, node, filter_layer, false);
+        
+        println!("node: {:#?}", node);
 
+        (build_child_nodes)(&mut body, statics, node, filter_layer);
+        
+        println!("body after build_child_nodes: {:#?}", body);
+        
+        update_body(&mut body, node, filter_layer, false);
+        
+        println!("body after update_body: {:#?}", body);
+        
         if node.if_else {
             code.push( quote! {
-                else if matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                else if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
                     #( #body )*
                 }
             } );
         } else {
             code.push( quote! {
-                if matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                    //println!("conn.service(): {:?}", conn.service()); 
                     #( #body )*
                 }
             } );
@@ -473,16 +483,15 @@ impl SessionDataFilter {
         let proto_name = Ident::new(service, Span::call_site());
         let proto_variant = Ident::new(&service.to_camel_case(), Span::call_site());
 
-        let condition = quote! { let retina_core::protocols::stream::SessionData::#proto_variant(#proto_name) = &session.data };
         if first_unary {
             code.push(quote! {
-                if #condition {
+                if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
                     #( #body )*
                 }
             })
         } else {
             code.push(quote! {
-                else if #condition {
+                else if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
                     #( #body )*
                 }
             })
