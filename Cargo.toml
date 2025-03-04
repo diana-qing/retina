@@ -10,7 +10,8 @@ members = [
     "examples/protocols",
     "examples/basic",
     "examples/basic_file",
-    "examples/log_ssh",
+    "examples/log_ssh", 
+    "examples/test_not_protocol",
 ]
 resolver = "2"
 
