@@ -39,25 +39,25 @@ fn not_http_cb(tls: &TlsHandshake) {
 }
 
 // no HttpTransaction's should be logged
-// #[filter("!http")]
-// fn not_http_cb2(http: &HttpTransaction) {
-//     println!("cb2");
-//     if let Ok(serialized) = serde_json::to_string(&http) {
-//         let mut wtr = file.lock().unwrap();
-//         wtr.write_all(serialized.as_bytes()).unwrap();
-//         wtr.write_all(b"\n").unwrap();
-//     }
-// }
+//#[filter("!http")]
+//fn not_http_cb2(http: &HttpTransaction) {
+//    println!("cb2");
+//    if let Ok(serialized) = serde_json::to_string(&http) {
+//        let mut wtr = file.lock().unwrap();
+//        wtr.write_all(serialized.as_bytes()).unwrap();
+//        wtr.write_all(b"\n").unwrap();
+//    }
+//}
 
-// #[filter("!tls")]
-// fn not_tls_cb(dns: &DnsTransaction) {
-//     println!("cb3");
-//     if let Ok(serialized) = serde_json::to_string(&dns) {
-//         let mut wtr = file.lock().unwrap();
-//         wtr.write_all(serialized.as_bytes()).unwrap();
-//         wtr.write_all(b"\n").unwrap();
-//     }
-// }
+//#[filter("!tls")]
+//fn not_tls_cb(dns: &DnsTransaction) {
+//    println!("cb3");
+//    if let Ok(serialized) = serde_json::to_string(&dns) {
+//        let mut wtr = file.lock().unwrap();
+//        wtr.write_all(serialized.as_bytes()).unwrap();
+//        wtr.write_all(b"\n").unwrap();
+//    }
+//}
 
 #[retina_main(1)]
 fn main() {
