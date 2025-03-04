@@ -232,7 +232,7 @@ pub(crate) fn update_body(
         let actions = node.actions.clone();
         body.push(quote! { result.push(&#actions); });
     }
-    println!("update_body: body: {:#?}", body);
+    // println!("update_body: body: {:#?}", body);
     if !node.deliver.is_empty() {
         for d in &node.deliver {
             let id = &d.id;
@@ -435,15 +435,15 @@ impl ConnDataFilter {
         let service_ident = Ident::new(&protocol.name().to_camel_case(), Span::call_site());
         let mut body: Vec<proc_macro2::TokenStream> = vec![];
         
-        println!("node: {:#?}", node);
+        //println!("node: {:#?}", node);
 
         (build_child_nodes)(&mut body, statics, node, filter_layer);
         
-        println!("body after build_child_nodes: {:#?}", body);
+        //println!("body after build_child_nodes: {:#?}", body);
         
         update_body(&mut body, node, filter_layer, false);
         
-        println!("body after update_body: {:#?}", body);
+        //println!("body after update_body: {:#?}", body);
         
         if node.if_else {
             code.push( quote! {
