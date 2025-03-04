@@ -873,7 +873,10 @@ impl Ord for PNode {
             }
         }
 
+        // Unary protocols
         // Sort by protocol name
+        // If one is "!=" and one is "=", return Less or Greater
+        // such that "!=" Predicate < "=" Predicate
         self.pred
             .get_protocol()
             .name()

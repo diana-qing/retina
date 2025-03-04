@@ -29,7 +29,7 @@ struct Args {
 }
 
 #[filter("!http")]
-fn not_http_cb(tls: &TlsHandshake) {
+fn not_http_cb(tls: &TlsHandshake) { //SessionList or ConnRecord
     println!("cb1");
     if let Ok(serialized) = serde_json::to_string(&tls) {
         let mut wtr = file.lock().unwrap();
@@ -38,6 +38,7 @@ fn not_http_cb(tls: &TlsHandshake) {
     }
 }
 
+// also test for !tcp, !ipv4, etc. - at least 1 packet-layer
 // no HttpTransaction's should be logged
 //#[filter("!http")]
 //fn not_http_cb2(http: &HttpTransaction) {

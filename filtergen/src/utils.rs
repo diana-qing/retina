@@ -483,6 +483,7 @@ impl SessionDataFilter {
         let proto_name = Ident::new(service, Span::call_site());
         let proto_variant = Ident::new(&service.to_camel_case(), Span::call_site());
 
+        // for places where first_unary is set to true, don't set it to true if it's a not predicate
         if first_unary {
             code.push(quote! {
                 if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {

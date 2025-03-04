@@ -37,6 +37,9 @@ fn gen_proto_filter_util(
     node: &PNode,
     _filter_layer: FilterLayer,
 ) {
+    // first_unary = true means we need an "if"
+    // first_unary = false means we need an "else if"
+    // don't set first_unary to false if "NOT protocol"
     let mut first_unary = true;
     for child in node
         .children
