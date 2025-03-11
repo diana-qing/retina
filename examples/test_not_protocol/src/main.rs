@@ -39,21 +39,21 @@ struct Args {
 //    }
 // }
 
-#[filter("!tls")]
-fn not_tls_cb(session_list: &SessionList) { //SessionList or ConnRecord
-    println!("{:#?}", session_list);
-}
+// #[filter("!tls")]
+// fn not_tls_cb(session_list: &SessionList) { //SessionList or ConnRecord
+//     println!("{:#?}", session_list);
+// }
 
 // no HttpTransaction's should be logged
-//#[filter("!http")]
-//fn not_http_cb(http: &HttpTransaction) {
-//    println!("cb3");
-//    if let Ok(serialized) = serde_json::to_string(&http) {
-//        let mut wtr = file.lock().unwrap();
-//        wtr.write_all(serialized.as_bytes()).unwrap();
-//        wtr.write_all(b"\n").unwrap();
-//    }
-//}
+#[filter("!http")]
+fn not_http_cb(http: &HttpTransaction) {
+   println!("cb3");
+   if let Ok(serialized) = serde_json::to_string(&http) {
+       let mut wtr = file.lock().unwrap();
+       wtr.write_all(serialized.as_bytes()).unwrap();
+       wtr.write_all(b"\n").unwrap();
+   }
+}
 
 #[retina_main(1)]
 fn main() {
