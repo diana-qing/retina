@@ -69,10 +69,10 @@ impl FlatPattern {
 
         let (layers, labels, (dists_to_root, nodes_same_layer)) = (&*LAYERS, &*NODE_BIMAP, &*NODES_BY_LAYER);
         
-        println!("layers: {:#?}", layers);
-        println!("labels: {:#?}", labels);
-        println!("dists_to_root: {:#?}", dists_to_root);
-        println!("nodes_same_layer: {:#?}", nodes_same_layer);
+        // println!("layers: {:#?}", layers);
+        // println!("labels: {:#?}", labels);
+        // println!("dists_to_root: {:#?}", dists_to_root);
+        // println!("nodes_same_layer: {:#?}", nodes_same_layer);
 
         let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
         let mut headers = HashSet::new();
@@ -89,11 +89,11 @@ impl FlatPattern {
                         // add all other nodes in the LAYERS graph that are at the same layer in the tree as this node to node_paths
                         if let Some(dist) = dists_to_root.get(node) {
                             if let Some(cousin_nodes) = nodes_same_layer.get(dist) {
-                                println!("cousin_nodes: {:#?}", cousin_nodes);
+                                // println!("cousin_nodes: {:#?}", cousin_nodes);
                                 for cousin_node in cousin_nodes {
                                     if cousin_node.index() != node.index() {
                                         let cousin_protocol_name = labels.get_by_left(cousin_node).unwrap();
-                                        println!("cousin_protocol_name: {:#?}", cousin_protocol_name);
+                                        // println!("cousin_protocol_name: {:#?}", cousin_protocol_name);
                                         headers.insert(cousin_protocol_name);
 
                                         let node_path: HashSet<Vec<NodeIndex>> =
@@ -155,14 +155,14 @@ impl FlatPattern {
             fq_paths.insert(fq_path);
         }
 
-        println!("fq_paths: {:#?}", fq_paths);
+        // println!("fq_paths: {:#?}", fq_paths);
 
         // build fully qualified patterns (could have multiple per non-fully-qualified pattern)
         let mut fq_patterns = vec![];
         for fq_path in fq_paths {
             let fq_headers: HashSet<&ProtocolName> = fq_path.iter().clone().collect();
-            println!("fq_headers: {:#?}", fq_headers);
-            println!("headers: {:#?}", headers);
+            // println!("fq_headers: {:#?}", fq_headers);
+            // println!("headers: {:#?}", headers);
             if !headers.is_disjoint(&fq_headers) {
                 let mut fq_pattern = LayeredPattern::new();
                 for protocol in fq_path.iter() {
@@ -272,8 +272,8 @@ impl LayeredPattern {
                 protocol: protocol.to_owned(),
                 not_op: false,
             });
-            println!("to_flat_pattern: protocol: {:?}", protocol);
-            println!("to_flat_pattern: field_preds: {:?}", field_preds);
+            // println!("to_flat_pattern: protocol: {:?}", protocol);
+            // println!("to_flat_pattern: field_preds: {:?}", field_preds);
             predicates.extend(field_preds.to_owned());
         }
         FlatPattern { predicates }

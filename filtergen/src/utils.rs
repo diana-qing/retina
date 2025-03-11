@@ -503,6 +503,7 @@ impl SessionDataFilter {
         update_body(&mut body, node, filter_layer, false);
 
         let service = protocol.name();
+        println!("service: {}", service);
         let proto_name = Ident::new(service, Span::call_site());
         let proto_variant = Ident::new(&service.to_camel_case(), Span::call_site());
         
