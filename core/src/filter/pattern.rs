@@ -75,6 +75,7 @@ impl FlatPattern {
         println!("nodes_same_layer: {:#?}", nodes_same_layer);
 
         let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
+        let mut headers = HashSet::new();
         for pred in self.predicates.iter() {
             let protocol_name = pred.get_protocol();
             match labels.get_by_right(protocol_name) {
@@ -91,6 +92,10 @@ impl FlatPattern {
                                 println!("cousin_nodes: {:#?}", cousin_nodes);
                                 for cousin_node in cousin_nodes {
                                     if cousin_node.index() != node.index() {
+                                        let cousin_protocol_name = labels.get_by_left(cousin_node).unwrap();
+                                        println!("cousin_protocol_name: {:#?}", cousin_protocol_name);
+                                        headers.insert(cousin_protocol_name);
+
                                         let node_path: HashSet<Vec<NodeIndex>> =
                                             algo::all_simple_paths(&layers, *cousin_node, *ethernet, 0, None).collect();
                                         node_paths.extend(node_path.iter().map(|p| p.to_vec()));
@@ -99,6 +104,7 @@ impl FlatPattern {
                             }
                         }
                     } else {
+                        headers.insert(protocol_name);
                         let node_path: HashSet<Vec<NodeIndex>> =
                             algo::all_simple_paths(&layers, *node, *ethernet, 0, None).collect();
                         node_paths.extend(node_path.iter().map(|p| p.to_vec()));
@@ -111,11 +117,12 @@ impl FlatPattern {
         println!("node_paths: {:#?}", node_paths);
 
         // let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
-        let headers = self
-            .predicates
-            .iter()
-            .map(|c| c.get_protocol())
-            .collect::<HashSet<_>>();
+        // let headers = self
+           // .predicates
+            //.iter()
+            //.map(|c| c.get_protocol())
+            //.collect::<HashSet<_>>();
+        
 
         // println!("headers: {:#?}", headers);
 
@@ -154,7 +161,9 @@ impl FlatPattern {
         let mut fq_patterns = vec![];
         for fq_path in fq_paths {
             let fq_headers: HashSet<&ProtocolName> = fq_path.iter().clone().collect();
-            if headers.is_subset(&fq_headers) {
+            println!("fq_headers: {:#?}", fq_headers);
+            println!("headers: {:#?}", headers);
+            if !headers.is_disjoint(&fq_headers) {
                 let mut fq_pattern = LayeredPattern::new();
                 for protocol in fq_path.iter() {
                     let proto_predicates = self
