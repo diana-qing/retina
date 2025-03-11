@@ -72,6 +72,7 @@ impl FlatPattern {
         println!("layers: {:#?}", layers);
         println!("labels: {:#?}", labels);
 
+        let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
         for pred in self.predicates.iter() {
             let protocol_name = pred.get_protocol();
             match labels.get_by_right(protocol_name) {
@@ -100,7 +101,7 @@ impl FlatPattern {
                         node_paths.extend(node_path.iter().map(|p| p.to_vec()));
                     }
                 }
-                None => panic!("Predicate header invalid: {}", header),
+                None => panic!("Invalid protocol name: {}", protocol_name),
             } 
         }
 
