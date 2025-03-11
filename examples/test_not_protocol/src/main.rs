@@ -31,7 +31,7 @@ struct Args {
 // also test for !tcp, !ipv4, etc. - at least 1 packet-layer
 // #[filter("!tcp")]
 // fn not_tcp_cb(conn_record: &ConnRecord) {
-//     println!("protocol: {}", conn_record.five_tuple.proto);
+//    println!("protocol: {}", conn_record.five_tuple.proto);
 //    if let Ok(serialized) = serde_json::to_string(&conn_record) {
 //        let mut wtr = file.lock().unwrap();
 //        wtr.write_all(serialized.as_bytes()).unwrap();
@@ -41,7 +41,12 @@ struct Args {
 
 #[filter("!tls")]
 fn not_tls_cb(session_list: &SessionList) { //SessionList or ConnRecord
-    println!("{:?}", session_list);
+    println!("cb2");
+    if let Ok(serialized) = serde_json::to_string(&session_list) {
+        let mut wtr = file.lock().unwrap();
+        wtr.write_all(serialized.as_bytes()).unwrap();
+        wtr.write_all(b"\n").unwrap();
+    }
 }
 
 // no HttpTransaction's should be logged
