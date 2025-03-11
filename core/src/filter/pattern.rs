@@ -212,6 +212,7 @@ impl LayeredPattern {
         for (protocol, field_preds) in self.0.iter() {
             predicates.push(Predicate::Unary {
                 protocol: protocol.to_owned(),
+                not_op: false,
             });
             predicates.extend(field_preds.to_owned());
         }

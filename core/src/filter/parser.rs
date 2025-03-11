@@ -116,12 +116,11 @@ impl FilterParser {
         println!("parse_predicate: inner: {:#?}", inner);
         
         // check if there's a not operator before the protocol
+        let mut not_op = false;
         if inner.len() > 1 {
             let _ = inner.next();
-            let not_op = true;
-        } else {
-            let not_op = false;
-        }
+            not_op = true;
+        } 
 
         let protocol = inner.next().unwrap();
         //println!("parse_predicate: protocol: {:#?}", protocol);

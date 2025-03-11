@@ -81,7 +81,7 @@ pub enum Predicate {
     // TODO: add a field to Unary indicating if this is !protocol
     Unary { 
         protocol: ProtocolName ,
-        not_op: Boolean,
+        not_op: bool,
     },
     /// Matches on a field in a protocol
     Binary {
@@ -109,6 +109,11 @@ impl Predicate {
     // Returns `true` if predicate is a binary constraint.
     pub fn is_binary(&self) -> bool {
         matches!(self, Predicate::Binary { .. })
+    }
+
+    // Returns `true` if predicate is a not predicate (i.e. has a not operator before the protocol), which only applies to unary constraints.
+    pub fn is_not_predicate(&self) -> bool {
+        matches!(self, Predicate::Unary { .. }) && not_op
     }
 
     // Returns `true` if predicate can be pushed to a packet filter.
@@ -226,7 +231,8 @@ impl Predicate {
     pub(super) fn is_excl(&self, pred: &Predicate) -> bool {
         // Unary predicates at the same layer are mutually exclusive
         // E.g.: `ipv4 | ipv6`, `tcp | udp`
-        if self.is_unary() && pred.is_unary() {
+        if self.is_unary() && pred.is_unary() { 
+            // TODO: update these rules to check if any of the Unary preds are a not protocol (e.g. !udp | tcp AREN'T mutually excl, !udp | !tcp ARE mutually excl)
             return true;
         }
         // A binary and unary predicate at the same layer will not be mutually excl.
