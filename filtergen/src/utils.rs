@@ -429,6 +429,7 @@ impl ConnDataFilter {
         statics: &mut Vec<proc_macro2::TokenStream>,
         node: &PNode,
         protocol: &ProtocolName,
+        not_op: &bool,
         filter_layer: FilterLayer,
         build_child_nodes: &BuildChildNodesFn,
     ) {
@@ -446,18 +447,35 @@ impl ConnDataFilter {
         //println!("body after update_body: {:#?}", body);
         
         if node.if_else {
-            code.push( quote! {
-                else if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
-                    #( #body )*
-                }
-            } );
+            if *not_op {
+                code.push( quote! {
+                    else if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                        #( #body )*
+                    }
+                } );
+            } else {
+                code.push( quote! {
+                    else if matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                        #( #body )*
+                    }
+                } );
+            }
         } else {
-            code.push( quote! {
-                if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
-                    //println!("conn.service(): {:?}", conn.service()); 
-                    #( #body )*
-                }
-            } );
+            if *not_op {
+                code.push( quote! {
+                    if !matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                        //println!("conn.service(): {:?}", conn.service()); 
+                        #( #body )*
+                    }
+                } );
+            } else {
+                code.push( quote! {
+                    if matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
+                        //println!("conn.service(): {:?}", conn.service()); 
+                        #( #body )*
+                    }
+                } );
+            }
         }
     }
 }
@@ -471,6 +489,7 @@ impl SessionDataFilter {
         statics: &mut Vec<proc_macro2::TokenStream>,
         node: &PNode,
         protocol: &ProtocolName,
+        not_op: &bool,
         first_unary: bool,
         filter_layer: FilterLayer,
         build_child_nodes: &BuildChildNodesFn,
@@ -485,17 +504,33 @@ impl SessionDataFilter {
 
         // for places where first_unary is set to true, don't set it to true if it's a not predicate
         if first_unary {
-            code.push(quote! {
-                if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
-                    #( #body )*
-                }
-            })
+            if *not_op {
+                code.push(quote! {
+                    if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
+                        #( #body )*
+                    }
+                })
+            } else {
+                code.push(quote! {
+                    if matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
+                        #( #body )*
+                    }
+                })
+            }
         } else {
-            code.push(quote! {
-                else if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
-                    #( #body )*
-                }
-            })
+            if *not_op {
+                code.push(quote! {
+                    else if !matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
+                        #( #body )*
+                    }
+                })
+            } else {
+                code.push(quote! {
+                    else if matches!(&session.data, retina_core::protocols::stream::SessionData::#proto_variant(#proto_name)) {
+                        #( #body )*
+                    }
+                })
+            }
         }
     }
 }

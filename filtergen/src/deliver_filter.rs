@@ -39,6 +39,9 @@ fn gen_deliver_util(
         match &child.pred {
             Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
+                    if not_op { // for places where first_unary is set to true, don't set it to true if it's a not predicate
+                        first_unary = false;
+                    }
                     if matches!(filter_layer, FilterLayer::PacketDeliver) {
                         PacketDataFilter::add_unary_pred(
                             code,
@@ -46,6 +49,7 @@ fn gen_deliver_util(
                             child,
                             node.pred.get_protocol(),
                             protocol,
+                            not_op,
                             first_unary,
                             filter_layer,
                             &gen_deliver_util,
@@ -56,6 +60,7 @@ fn gen_deliver_util(
                             statics,
                             child,
                             protocol,
+                            not_op,
                             first_unary,
                             filter_layer,
                             &gen_deliver_util,
@@ -68,6 +73,7 @@ fn gen_deliver_util(
                         statics,
                         child,
                         protocol,
+                        not_op,
                         filter_layer,
                         &gen_deliver_util,
                     );
