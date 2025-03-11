@@ -105,12 +105,14 @@ impl FlatPattern {
             } 
         }
 
+        println!("node_paths: {:#?}", node_paths);
+
         // let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
-        // let headers = self
-        //     .predicates
-        //     .iter()
-        //     .map(|c| c.get_protocol())
-        //     .collect::<HashSet<_>>();
+        let headers = self
+            .predicates
+            .iter()
+            .map(|c| c.get_protocol())
+            .collect::<HashSet<_>>();
 
         // println!("headers: {:#?}", headers);
 
@@ -129,7 +131,7 @@ impl FlatPattern {
         //     }
         // }
 
-        println!("node_paths: {:#?}", node_paths);
+        // println!("node_paths: {:#?}", node_paths);
 
         // all possible fully qualified paths from predicated headers
         let mut fq_paths = HashSet::new();
