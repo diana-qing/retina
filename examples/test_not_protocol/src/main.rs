@@ -1,5 +1,5 @@
 use retina_core::{config::load_config, Runtime};
-use retina_datatypes::{DnsTransaction, HttpTransaction, TlsHandshake};
+use retina_datatypes::{ConnRecord, HttpTransaction, SessionList};
 use retina_filtergen::{filter, retina_main};
 
 use clap::Parser;
@@ -28,32 +28,27 @@ struct Args {
     outfile: PathBuf,
 }
 
-#[filter("!http")]
-fn not_http_cb(tls: &TlsHandshake) { //SessionList or ConnRecord
-    println!("cb1");
-    if let Ok(serialized) = serde_json::to_string(&tls) {
-        let mut wtr = file.lock().unwrap();
-        wtr.write_all(serialized.as_bytes()).unwrap();
-        wtr.write_all(b"\n").unwrap();
-    }
+// also test for !tcp, !ipv4, etc. - at least 1 packet-layer
+#[filter("!tcp")]
+fn not_tcp_cb(conn_record: &ConnRecord) {
+    println!("protocol: {}", conn_record.five_tuple.proto);
+   if let Ok(serialized) = serde_json::to_string(&conn_record) {
+       let mut wtr = file.lock().unwrap();
+       wtr.write_all(serialized.as_bytes()).unwrap();
+       wtr.write_all(b"\n").unwrap();
+   }
 }
 
-// also test for !tcp, !ipv4, etc. - at least 1 packet-layer
+#[filter("!tls")]
+fn not_tls_cb(session_list: &SessionList) { //SessionList or ConnRecord
+    println!("{:?}", session_list);
+}
+
 // no HttpTransaction's should be logged
 //#[filter("!http")]
-//fn not_http_cb2(http: &HttpTransaction) {
-//    println!("cb2");
-//    if let Ok(serialized) = serde_json::to_string(&http) {
-//        let mut wtr = file.lock().unwrap();
-//        wtr.write_all(serialized.as_bytes()).unwrap();
-//        wtr.write_all(b"\n").unwrap();
-//    }
-//}
-
-//#[filter("!tls")]
-//fn not_tls_cb(dns: &DnsTransaction) {
+//fn not_http_cb(http: &HttpTransaction) {
 //    println!("cb3");
-//    if let Ok(serialized) = serde_json::to_string(&dns) {
+//    if let Ok(serialized) = serde_json::to_string(&http) {
 //        let mut wtr = file.lock().unwrap();
 //        wtr.write_all(serialized.as_bytes()).unwrap();
 //        wtr.write_all(b"\n").unwrap();
