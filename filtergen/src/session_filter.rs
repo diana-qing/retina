@@ -38,7 +38,7 @@ fn gen_session_filter_util(
         match &child.pred {
             Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
-                    if not_op { // for places where first_unary is set to true, don't set it to true if it's a not predicate
+                    if *not_op { // for places where first_unary is set to true, don't set it to true if it's a not predicate
                         first_unary = false;
                     }
                     ConnDataFilter::add_unary_pred(
@@ -46,14 +46,14 @@ fn gen_session_filter_util(
                         statics,
                         child,
                         protocol,
-                        not_op,
+                        // not_op,
                         first_unary,
                         FilterLayer::Session,
                         &gen_session_filter_util,
                     );
                     first_unary = false;
                 } else if child.pred.on_proto() {
-                    if not_op {
+                    if *not_op {
                         first_unary = false;
                     }
                     SessionDataFilter::add_service_pred(

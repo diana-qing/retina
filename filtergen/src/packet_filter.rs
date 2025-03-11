@@ -44,6 +44,7 @@ fn gen_packet_filter_util(
                     child,
                     node.pred.get_protocol(),
                     protocol,
+                    // not_op,
                     first_unary,
                     filter_layer,
                     &gen_packet_filter_util,
