@@ -59,7 +59,7 @@ lazy_static! {
 lazy_static! {
     /// Determine which nodes are at the same layer in the filter tree.
     /// For example, udp and tcp are at the same layer.
-    pub static ref NODES_BY_LAYER: (HashMap<Vec<NodeIndex>, usize>, HashMap<usize, Vec<NodeIndex>>) = {
+    pub static ref NODES_BY_LAYER: (HashMap<NodeIndex, usize>, HashMap<usize, Vec<NodeIndex>>) = {
         let root = NODE_BIMAP.get_by_right(&protocol!("ethernet"));
         let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&*LAYERS, *root, None, |_| 1);
         
