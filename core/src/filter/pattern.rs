@@ -68,6 +68,9 @@ impl FlatPattern {
         }
 
         let (layers, labels) = (&*LAYERS, &*NODE_BIMAP);
+        
+        println!("layers: {:#?}", layers);
+        println!("labels: {:#?}", labels);
 
         let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
         let headers = self
@@ -75,7 +78,11 @@ impl FlatPattern {
             .iter()
             .map(|c| c.get_protocol())
             .collect::<HashSet<_>>();
+
+        println!("headers: {:#?}", headers);
+
         for header in headers.iter() {
+            println!("header: {:#?}", header);
             match labels.get_by_right(header) {
                 Some(node) => {
                     let ethernet = labels
@@ -89,6 +96,8 @@ impl FlatPattern {
             }
         }
 
+        println!("node_paths: {:#?}", node_paths);
+
         // all possible fully qualified paths from predicated headers
         let mut fq_paths = HashSet::new();
         for node_path in node_paths {
@@ -100,6 +109,8 @@ impl FlatPattern {
             fq_path.reverse();
             fq_paths.insert(fq_path);
         }
+
+        println!("fq_paths: {:#?}", fq_paths);
 
         // build fully qualified patterns (could have multiple per non-fully-qualified pattern)
         let mut fq_patterns = vec![];
@@ -214,6 +225,8 @@ impl LayeredPattern {
                 protocol: protocol.to_owned(),
                 not_op: false,
             });
+            println!("to_flat_pattern: protocol: {:?}", protocol);
+            println!("to_flat_pattern: field_preds: {:?}", field_preds);
             predicates.extend(field_preds.to_owned());
         }
         FlatPattern { predicates }

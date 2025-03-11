@@ -448,6 +448,8 @@ impl ConnDataFilter {
         
         //println!("body after update_body: {:#?}", body);
         
+        println!("not_op: {}", *not_op);
+        
         if node.if_else {
             if *not_op {
                 code.push( quote! {
@@ -473,7 +475,7 @@ impl ConnDataFilter {
             } else {
                 code.push( quote! {
                     if matches!(conn.service(), retina_core::protocols::stream::ConnParser::#service_ident { .. }) {
-                        //println!("conn.service(): {:?}", conn.service()); 
+                        println!("conn.service(): {:?}", conn.service()); 
                         #( #body )*
                     }
                 } );
@@ -503,7 +505,7 @@ impl SessionDataFilter {
         let service = protocol.name();
         let proto_name = Ident::new(service, Span::call_site());
         let proto_variant = Ident::new(&service.to_camel_case(), Span::call_site());
-
+        
         // for places where first_unary is set to true, don't set it to true if it's a not predicate
         if first_unary {
             if *not_op {
