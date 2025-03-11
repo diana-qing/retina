@@ -61,13 +61,17 @@ lazy_static! {
     /// For example, udp and tcp are at the same layer.
     pub static ref NODES_BY_LAYER: (HashMap<NodeIndex, usize>, HashMap<usize, Vec<NodeIndex>>) = {
         let root = NODE_BIMAP.get_by_right(&protocol!("ethernet"));
-        let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&*LAYERS, *root, None, |_| 1);
-        
-        let mut nodes_same_layer: HashMap<usize, Vec<NodeIndex>> = HashMap::new();
-        for (node, layer) in dists_to_root.iter() {
-            nodes_same_layer.entry(layer).or_default().push(node);
+        match root {
+            Some(root_node) => {
+                let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&*LAYERS, *root_node, None, |_| 1);
+                let mut nodes_same_layer: HashMap<usize, Vec<NodeIndex>> = HashMap::new();
+                for (node, layer) in dists_to_root.iter() {
+                    nodes_same_layer.entry(*layer).or_default().push(*node);
+                }
+                (dists_to_root, nodes_same_layer)
+            }
+            _ => panic!("Not a valid root node"),
         }
-        (dists_to_root, nodes_same_layer)
     };
 }
 
