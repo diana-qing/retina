@@ -114,7 +114,7 @@ impl Predicate {
     // Returns `true` if predicate is a not predicate (i.e. has a not operator before the protocol), which only applies to unary constraints.
     pub fn is_not_predicate(&self) -> bool {
         match self {
-            Predicate::Unary { not_op, .. } => not_op,
+            Predicate::Unary { not_op, .. } => *not_op,
             Predicate::Binary { .. } => false,
         }
     }
