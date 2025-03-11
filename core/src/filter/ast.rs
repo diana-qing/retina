@@ -2,7 +2,7 @@ use super::hardware;
 use super::ptree::FilterLayer;
 use super::Level;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use crate::protocols::stream::ConnData;
