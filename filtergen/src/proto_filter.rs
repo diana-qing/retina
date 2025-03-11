@@ -49,9 +49,9 @@ fn gen_proto_filter_util(
         match &child.pred {
             Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
-                    if *not_op {
-                        first_unary = false;
-                    }
+                    // if *not_op {
+                    //     first_unary = false;
+                    // }
                     ConnDataFilter::add_unary_pred(
                         code,
                         statics,
@@ -64,15 +64,15 @@ fn gen_proto_filter_util(
                     );
                     first_unary = false;
                 } else if child.pred.on_proto() {
-                    if *not_op {
-                        first_unary = false;
-                    }
+                    // if *not_op {
+                    //     first_unary = false;
+                    // }
                     ConnDataFilter::add_service_pred(
                         code,
                         statics,
                         child,
                         protocol,
-                        not_op,
+                        // not_op,
                         FilterLayer::Protocol,
                         &gen_proto_filter_util,
                     );
