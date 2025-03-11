@@ -12,6 +12,7 @@ use itertools::Itertools;
 use petgraph::algo;
 use petgraph::graph::Graph;
 use petgraph::graph::NodeIndex;
+use petgraph::visit::Reversed;
 use regex::Regex;
 
 use crate::port::Port;
@@ -61,9 +62,12 @@ lazy_static! {
     /// For example, udp and tcp are at the same layer.
     pub static ref NODES_BY_LAYER: (HashMap<NodeIndex, usize>, HashMap<usize, Vec<NodeIndex>>) = {
         let root = NODE_BIMAP.get_by_right(&protocol!("ethernet"));
+        
         match root {
             Some(root_node) => {
-                let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&*LAYERS, *root_node, None, |_| 1);
+                let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&Reversed(&*LAYERS), *root_node, None, |_| 1);
+                
+                println!("dists_to_root: {:#?}", dists_to_root);
                 let mut nodes_same_layer: HashMap<usize, Vec<NodeIndex>> = HashMap::new();
                 for (node, layer) in dists_to_root.iter() {
                     nodes_same_layer.entry(*layer).or_default().push(*node);

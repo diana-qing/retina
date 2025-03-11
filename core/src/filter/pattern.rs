@@ -71,6 +71,8 @@ impl FlatPattern {
         
         println!("layers: {:#?}", layers);
         println!("labels: {:#?}", labels);
+        println!("dists_to_root: {:#?}", dists_to_root);
+        println!("nodes_same_layer: {:#?}", nodes_same_layer);
 
         let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
         for pred in self.predicates.iter() {
@@ -86,6 +88,7 @@ impl FlatPattern {
                         // add all other nodes in the LAYERS graph that are at the same layer in the tree as this node to node_paths
                         if let Some(dist) = dists_to_root.get(node) {
                             if let Some(cousin_nodes) = nodes_same_layer.get(dist) {
+                                println!("cousin_nodes: {:#?}", cousin_nodes);
                                 for cousin_node in cousin_nodes {
                                     if cousin_node.index() != node.index() {
                                         let node_path: HashSet<Vec<NodeIndex>> =
