@@ -67,7 +67,6 @@ lazy_static! {
             Some(root_node) => {
                 let dists_to_root: HashMap<NodeIndex, usize> = algo::dijkstra(&Reversed(&*LAYERS), *root_node, None, |_| 1);
                 
-                println!("dists_to_root: {:#?}", dists_to_root);
                 let mut nodes_same_layer: HashMap<usize, Vec<NodeIndex>> = HashMap::new();
                 for (node, layer) in dists_to_root.iter() {
                     nodes_same_layer.entry(*layer).or_default().push(*node);

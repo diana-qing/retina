@@ -13,8 +13,12 @@ pub(crate) fn gen_session_filter(
     if !ptree.root.actions.drop() || !ptree.root.deliver.is_empty() {
         update_body(&mut body, &ptree.root, FilterLayer::Session, false);
     }
+    
+    //println!("gen_session_filter: body: {:#?}", body); 
 
     gen_session_filter_util(&mut body, statics, &ptree.root, FilterLayer::Session);
+    
+    //println!("gen_session_filter after: body: {:#?}", body); 
 
     let start = quote! { let mut result = retina_core::filter::Actions::new(); };
     let ret = quote! { result };
@@ -33,6 +37,7 @@ fn gen_session_filter_util(
     node: &PNode,
     _filter_layer: FilterLayer,
 ) {
+    //println!("gen_session_filter_util: node: {:#?}", node);
     let mut first_unary = true;
     for child in node.children.iter() {
         match &child.pred {

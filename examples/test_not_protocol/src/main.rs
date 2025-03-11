@@ -1,5 +1,5 @@
 use retina_core::{config::load_config, Runtime};
-use retina_datatypes::{ConnRecord, HttpTransaction, SessionList};
+use retina_datatypes::{ConnRecord, TlsHandshake, SessionList};
 use retina_filtergen::{filter, retina_main};
 
 use clap::Parser;
@@ -44,11 +44,11 @@ struct Args {
 //     println!("{:#?}", session_list);
 // }
 
-// no HttpTransaction's should be logged
-#[filter("!http")]
-fn not_http_cb(http: &HttpTransaction) {
+// no TlsHandshake's should be logged
+#[filter("!tls")]
+fn not_tls_cb(tls: &TlsHandshake) {
    println!("cb3");
-   if let Ok(serialized) = serde_json::to_string(&http) {
+   if let Ok(serialized) = serde_json::to_string(&tls) {
        let mut wtr = file.lock().unwrap();
        wtr.write_all(serialized.as_bytes()).unwrap();
        wtr.write_all(b"\n").unwrap();

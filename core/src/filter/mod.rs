@@ -118,7 +118,7 @@ impl Filter {
             .map(|p| FlatPattern { predicates: p })
             .collect::<Vec<_>>();
         
-        println!("flat_patterns: {:#?}", flat_patterns);
+        //println!("flat_patterns: {:#?}", flat_patterns);
 
         let mut fq_patterns = vec![];
         for pattern in flat_patterns.iter() {
@@ -129,7 +129,7 @@ impl Filter {
         fq_patterns.sort();
         fq_patterns.dedup();
 
-        println!("fq_patterns: {:#?}", fq_patterns);
+        //println!("fq_patterns: {:#?}", fq_patterns);
 
         // prune redundant branches
         let flat_patterns: Vec<_> = fq_patterns.iter().map(|p| p.to_flat_pattern()).collect();
@@ -137,7 +137,7 @@ impl Filter {
         let mut ptree = FlatPTree::new(&flat_patterns);
         ptree.prune_branches();
         
-        println!("ptree: {:#?}", ptree);
+        //println!("ptree: {:#?}", ptree);
 
         Ok(Filter {
             patterns: ptree.to_layered_patterns(),

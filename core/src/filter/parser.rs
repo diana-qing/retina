@@ -19,17 +19,17 @@ impl FilterParser {
     pub(crate) fn parse_filter(filter_raw: &str) -> Result<Vec<RawPattern>> {
         //println!("filter_raw: {}", filter_raw);
         let ast = FilterParser::parse_as_ast(filter_raw)?;
-        println!("ast: {:#?}", ast);
+        //println!("ast: {:#?}", ast);
         Ok(FilterParser::flatten_disjunct(ast))
     }
 
     fn parse_as_ast(filter_raw: &str) -> Result<Node> {
         let pairs = FilterParser::parse(Rule::filter, filter_raw);
-        println!("pairs: {:#?}", pairs);
+        //println!("pairs: {:#?}", pairs);
         match pairs {
             Ok(mut pairs) => {
                 let pair = pairs.next().unwrap();
-                println!("pair: {:#?}", pair);
+                //println!("pair: {:#?}", pair);
                 FilterParser::parse_disjunct(pair)
             }
             Err(_) => bail!(FilterError::InvalidFormat),
@@ -111,9 +111,9 @@ impl FilterParser {
     }
 
     fn parse_predicate(pair: Pair<Rule>) -> Result<Vec<Node>> {
-        println!("parse_predicate: pair: {:#?}", pair);
+        //println!("parse_predicate: pair: {:#?}", pair);
         let mut inner = pair.into_inner();
-        println!("parse_predicate: inner: {:#?}", inner);
+        //println!("parse_predicate: inner: {:#?}", inner);
         
         // check if there's a not operator before the protocol
         let mut not_op = false;

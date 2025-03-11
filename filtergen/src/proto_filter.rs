@@ -14,11 +14,11 @@ pub(crate) fn gen_proto_filter(
         update_body(&mut body, &ptree.root, FilterLayer::Protocol, false);
     }
 
-    println!("gen_proto_filter: body: {:#?}", body);
+    //println!("gen_proto_filter: body: {:#?}", body);
 
     gen_proto_filter_util(&mut body, statics, &ptree.root, FilterLayer::Protocol);
     
-    println!("gen_proto_filter #2: body: {:#?}", body);
+    //println!("gen_proto_filter #2: body: {:#?}", body);
     
     let start = quote! { let mut result = retina_core::filter::Actions::new(); };
     let ret = quote! { result };

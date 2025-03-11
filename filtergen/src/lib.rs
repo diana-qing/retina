@@ -245,11 +245,11 @@ fn filter_subtree(input: &SubscriptionConfig, filter_layer: FilterLayer) -> PTre
         let filter = Filter::new(&spec.filter)
             .unwrap_or_else(|err| panic!("Failed to parse filter {}: {:?}", spec.filter, err));
         
-        println!("filter_subtree: filter: {:#?}", filter);
+        //println!("filter_subtree: filter: {:#?}", filter);
 
         let patterns = filter.get_patterns_flat();
         
-        println!("filter_subtree: patterns: {:#?}", patterns);
+        //println!("filter_subtree: patterns: {:#?}", patterns);
 
         let deliver = Deliver {
             id: i,
@@ -282,17 +282,17 @@ fn generate(input: syn::ItemFn, config: SubscriptionConfig) -> TokenStream {
         &mut statics,
         FilterLayer::PacketContinue,
     );
-    //println!("packet_continue: {:#?}", packet_continue);
 
     let packet_ptree = filter_subtree(&config, FilterLayer::Packet);
+    //println!("packet_ptree: {:#?}", packet_ptree);
     let packet_filter = gen_packet_filter(&packet_ptree, &mut statics, FilterLayer::Packet);
 
     let conn_ptree = filter_subtree(&config, FilterLayer::Protocol);
     //println!("conn_ptree: {:#?}", conn_ptree);
     let proto_filter = gen_proto_filter(&conn_ptree, &mut statics);
-    //println!("proto_filter: {:#?}", proto_filter);
 
     let session_ptree = filter_subtree(&config, FilterLayer::Session);
+    //println!("session_ptree: {:#?}", session_ptree);
     let session_filter = gen_session_filter(&session_ptree, &mut statics);
 
     let conn_deliver_ptree = filter_subtree(&config, FilterLayer::ConnectionDeliver);
@@ -302,6 +302,7 @@ fn generate(input: syn::ItemFn, config: SubscriptionConfig) -> TokenStream {
         &mut statics,
         FilterLayer::ConnectionDeliver,
     );
+
     let packet_deliver_ptree = filter_subtree(&config, FilterLayer::PacketDeliver);
     let packet_deliver_filter = gen_deliver_filter(
         &packet_deliver_ptree,

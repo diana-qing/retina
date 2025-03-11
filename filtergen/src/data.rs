@@ -289,6 +289,7 @@ pub(crate) fn build_callback(
         if matches!(datatype.level, Level::Session) && matches!(filter_layer, FilterLayer::Session)
         {
             let type_ident = Ident::new(datatype.as_str, Span::call_site());
+            // condition in session_filter
             condition = quote! { if let Some(s) = #type_ident::from_session(session) };
             params.push(quote! { s });
         } else if matches!(datatype.level, Level::Static | Level::Connection) {

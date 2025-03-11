@@ -114,7 +114,7 @@ impl FlatPattern {
             } 
         }
 
-        println!("node_paths: {:#?}", node_paths);
+        // println!("node_paths: {:#?}", node_paths);
 
         // let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
         // let headers = self
@@ -155,14 +155,14 @@ impl FlatPattern {
             fq_paths.insert(fq_path);
         }
 
-        // println!("fq_paths: {:#?}", fq_paths);
-
+        //println!("fq_paths: {:#?}", fq_paths);
+        //println!("headers: {:#?}", headers);
+        
         // build fully qualified patterns (could have multiple per non-fully-qualified pattern)
         let mut fq_patterns = vec![];
         for fq_path in fq_paths {
             let fq_headers: HashSet<&ProtocolName> = fq_path.iter().clone().collect();
-            // println!("fq_headers: {:#?}", fq_headers);
-            // println!("headers: {:#?}", headers);
+            //println!("fq_headers: {:#?}", fq_headers);
             if !headers.is_disjoint(&fq_headers) {
                 let mut fq_pattern = LayeredPattern::new();
                 for protocol in fq_path.iter() {
@@ -179,6 +179,7 @@ impl FlatPattern {
                     assert!(fq_pattern.add_protocol(protocol.to_owned(), proto_predicates));
                 }
                 fq_patterns.push(fq_pattern);
+                //println!("fq_patterns: {:#?}", fq_patterns);
             }
         }
         if fq_patterns.is_empty() {
