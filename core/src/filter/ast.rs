@@ -113,7 +113,10 @@ impl Predicate {
 
     // Returns `true` if predicate is a not predicate (i.e. has a not operator before the protocol), which only applies to unary constraints.
     pub fn is_not_predicate(&self) -> bool {
-        matches!(self, Predicate::Unary { .. }) && self.not_op
+        match self {
+            Predicate::Unary { .., not_op } => not_op,
+            Predicate::Binary { .. } => false,
+        }
     }
 
     // Returns `true` if predicate can be pushed to a packet filter.
