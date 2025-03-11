@@ -67,34 +67,66 @@ impl FlatPattern {
             return Ok(Vec::new());
         }
 
-        let (layers, labels) = (&*LAYERS, &*NODE_BIMAP);
+        let (layers, labels, (dists_to_root, nodes_same_layer)) = (&*LAYERS, &*NODE_BIMAP, &*NODES_BY_LAYER);
         
         println!("layers: {:#?}", layers);
         println!("labels: {:#?}", labels);
 
-        let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
-        let headers = self
-            .predicates
-            .iter()
-            .map(|c| c.get_protocol())
-            .collect::<HashSet<_>>();
-
-        println!("headers: {:#?}", headers);
-
-        for header in headers.iter() {
-            println!("header: {:#?}", header);
-            match labels.get_by_right(header) {
+        for pred in self.predicates.iter() {
+            let protocol_name = pred.get_protocol();
+            match labels.get_by_right(protocol_name) {
                 Some(node) => {
                     let ethernet = labels
                         .get_by_right(&protocol!("ethernet"))
                         .expect("Ethernet not defined.");
-                    let node_path: HashSet<Vec<NodeIndex>> =
-                        algo::all_simple_paths(&layers, *node, *ethernet, 0, None).collect();
-                    node_paths.extend(node_path.iter().map(|p| p.to_vec()));
+
+                    // if not predicate
+                    if pred.is_unary() && pred.is_not_predicate() {
+                        // add all other nodes in the LAYERS graph that are at the same layer in the tree as this node to node_paths
+                        if let Some(dist) = dists_to_root.get(node) {
+                            if let Some(cousin_nodes) = nodes_same_layer.get(dist) {
+                                for cousin_node in cousin_nodes {
+                                    if cousin_node.index() != node.index() {
+                                        let node_path: HashSet<Vec<NodeIndex>> =
+                                            algo::all_simple_paths(&layers, *cousin_node, *ethernet, 0, None).collect();
+                                        node_paths.extend(node_path.iter().map(|p| p.to_vec()));
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        let node_path: HashSet<Vec<NodeIndex>> =
+                            algo::all_simple_paths(&layers, *node, *ethernet, 0, None).collect();
+                        node_paths.extend(node_path.iter().map(|p| p.to_vec()));
+                    }
                 }
                 None => panic!("Predicate header invalid: {}", header),
-            }
+            } 
         }
+
+        // let mut node_paths: HashSet<Vec<NodeIndex>> = HashSet::new();
+        // let headers = self
+        //     .predicates
+        //     .iter()
+        //     .map(|c| c.get_protocol())
+        //     .collect::<HashSet<_>>();
+
+        // println!("headers: {:#?}", headers);
+
+        // for header in headers.iter() {
+        //     println!("header: {:#?}", header);
+        //     match labels.get_by_right(header) {
+        //         Some(node) => {
+        //             let ethernet = labels
+        //                 .get_by_right(&protocol!("ethernet"))
+        //                 .expect("Ethernet not defined.");
+        //             let node_path: HashSet<Vec<NodeIndex>> =
+        //                 algo::all_simple_paths(&layers, *node, *ethernet, 0, None).collect();
+        //             node_paths.extend(node_path.iter().map(|p| p.to_vec()));
+        //         }
+        //         None => panic!("Predicate header invalid: {}", header),
+        //     }
+        // }
 
         println!("node_paths: {:#?}", node_paths);
 
