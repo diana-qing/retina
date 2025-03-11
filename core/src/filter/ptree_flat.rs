@@ -93,6 +93,7 @@ impl FlatPTree {
             id: 0,
             pred: Predicate::Unary {
                 protocol: protocol!("ethernet"),
+                not_op: false,
             },
             is_terminal: false,
             terminates: Terminate::None,
@@ -109,6 +110,7 @@ impl FlatPTree {
             id: 0,
             pred: Predicate::Unary {
                 protocol: protocol!("ethernet"),
+                not_op: false,
             },
             is_terminal: false,
             terminates: Terminate::None,

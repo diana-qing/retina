@@ -36,7 +36,7 @@ fn gen_session_filter_util(
     let mut first_unary = true;
     for child in node.children.iter() {
         match &child.pred {
-            Predicate::Unary { protocol } => {
+            Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
                     ConnDataFilter::add_unary_pred(
                         code,

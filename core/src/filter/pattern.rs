@@ -35,7 +35,7 @@ impl FlatPattern {
 
         for predicate in self.predicates.iter() {
             match predicate {
-                Predicate::Unary { protocol } => {
+                Predicate::Unary { protocol, .. } => {
                     let cur_header = unwrap_or_ret_false!(labels.get_by_right(protocol));
                     ret = ret && layers.contains_edge(*cur_header, *prev_header);
                     prev_header = cur_header;

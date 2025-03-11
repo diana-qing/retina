@@ -118,6 +118,9 @@ impl FilterParser {
         // check if there's a not operator before the protocol
         if inner.len() > 1 {
             let _ = inner.next();
+            let not_op = true;
+        } else {
+            let not_op = false;
         }
 
         let protocol = inner.next().unwrap();
@@ -177,6 +180,7 @@ impl FilterParser {
             }
             None => Ok(vec![Node::Predicate(Predicate::Unary {
                 protocol: FilterParser::parse_protocol(protocol),
+                not_op: not_op,
             })]),
         }
     }

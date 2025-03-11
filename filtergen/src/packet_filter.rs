@@ -37,7 +37,7 @@ fn gen_packet_filter_util(
     let mut first_unary = true;
     for child in node.children.iter().filter(|n| n.pred.on_packet()) {
         match &child.pred {
-            Predicate::Unary { protocol } => {
+            Predicate::Unary { protocol, not_op } => {
                 PacketDataFilter::add_unary_pred(
                     code,
                     statics,

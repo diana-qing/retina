@@ -37,7 +37,7 @@ fn gen_deliver_util(
     let mut first_unary = true;
     for child in node.children.iter() {
         match &child.pred {
-            Predicate::Unary { protocol } => {
+            Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
                     if matches!(filter_layer, FilterLayer::PacketDeliver) {
                         PacketDataFilter::add_unary_pred(

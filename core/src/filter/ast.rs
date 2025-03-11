@@ -79,7 +79,10 @@ fn has_path(from: &ProtocolName, to: &ProtocolName) -> bool {
 pub enum Predicate {
     /// Matches on a protocol
     // TODO: add a field to Unary indicating if this is !protocol
-    Unary { protocol: ProtocolName },
+    Unary { 
+        protocol: ProtocolName ,
+        not_op: Boolean,
+    },
     /// Matches on a field in a protocol
     Binary {
         protocol: ProtocolName,
@@ -93,7 +96,7 @@ impl Predicate {
     // Returns the name of the protocol.
     pub fn get_protocol(&self) -> &ProtocolName {
         match self {
-            Predicate::Unary { protocol } => protocol,
+            Predicate::Unary { protocol , ..} => protocol,
             Predicate::Binary { protocol, .. } => protocol,
         }
     }
@@ -209,6 +212,7 @@ impl Predicate {
     pub(super) fn default_pred() -> Predicate {
         Predicate::Unary {
             protocol: protocol!("ethernet"),
+            not_op: false,
         }
     }
 
@@ -835,7 +839,16 @@ pub(super) fn is_parent_int(
 impl fmt::Display for Predicate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match &self {
-            Predicate::Unary { protocol } => write!(f, "{}", protocol),
+            Predicate::Unary { 
+                protocol ,
+                not_op
+            } => {
+                if *not_op {
+                    write!(f, "!{}", protocol)
+                } else {
+                    write!(f, "{}", protocol)
+                }
+            }
             Predicate::Binary {
                 protocol,
                 field,
@@ -971,10 +984,12 @@ mod tests {
         assert!(pred.req_packet());
         let pred = Predicate::Unary {
             protocol: protocol!("tcp"),
+            not_op: false,
         };
         assert!(!pred.req_packet());
         let pred = Predicate::Unary {
             protocol: protocol!("ethernet"),
+            not_op: false,
         };
         assert!(pred.req_packet());
     }
@@ -996,6 +1011,7 @@ mod tests {
     fn core_ast_packet_predicates() {
         let ipv4_unary = Predicate::Unary {
             protocol: protocol!("ipv4"),
+            not_op: false,
         };
         assert!(ipv4_unary.on_packet());
 
@@ -1009,6 +1025,7 @@ mod tests {
 
         let tcp_unary = Predicate::Unary {
             protocol: protocol!("tcp"),
+            not_op: false,
         };
         assert!(tcp_unary.on_packet());
 
@@ -1025,11 +1042,13 @@ mod tests {
     fn core_ast_connection_predicates() {
         let tls_unary = Predicate::Unary {
             protocol: protocol!("tls"),
+            not_op: false,
         };
         assert!(tls_unary.on_proto());
 
         let dns_unary = Predicate::Unary {
             protocol: protocol!("dns"),
+            not_op: false,
         };
         assert!(dns_unary.on_proto());
     }
@@ -1128,6 +1147,7 @@ mod tests {
 
         let http_unary = Predicate::Unary {
             protocol: protocol!("http"),
+            not_op: false,
         };
         let http_get = Predicate::Binary {
             protocol: protocol!("http"),

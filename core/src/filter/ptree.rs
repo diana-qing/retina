@@ -293,6 +293,7 @@ impl PTree {
     pub fn new_empty(filter_layer: FilterLayer) -> Self {
         let pred = Predicate::Unary {
             protocol: protocol!("ethernet"),
+            not_op: false,
         };
         Self {
             root: PNode::new(pred, 0),
@@ -496,6 +497,7 @@ impl PTree {
     fn clear(&mut self) {
         let pred = Predicate::Unary {
             protocol: protocol!("ethernet"),
+            not_op: false,
         };
         self.root = PNode::new(pred, 0);
         self.size = 1;

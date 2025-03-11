@@ -47,7 +47,7 @@ fn gen_proto_filter_util(
         .filter(|n| n.pred.on_packet() || n.pred.on_proto())
     {
         match &child.pred {
-            Predicate::Unary { protocol } => {
+            Predicate::Unary { protocol, not_op } => {
                 if child.pred.on_packet() {
                     ConnDataFilter::add_unary_pred(
                         code,
