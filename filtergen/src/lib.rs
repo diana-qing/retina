@@ -138,7 +138,7 @@
 //! | Integer       | `443`              |
 //! | String        | `'Safari'`         |
 //! | Integer range | `1024..5000`       |
-//! | Byte          | `|32 2E 30|`       |
+//! | Byte          | `\|32 2E 30\|`       |
 //!
 //! ## Binary comparison operators
 //! | Operator |   Alias   |         Description        | Example                         |
@@ -153,6 +153,7 @@
 //! | `~`      | `matches` | Regular expression match   | `tls.sni ~ 'netflix\\.com$'`    |
 //! | `~b`     |           | Byte regular expression match | `ssh.protocol_version_ctos ~b '(?-u)^\x32\\.\x30$'` |
 //! | `contains` |           | Check if right appears in left | `ssh.key_exchange_cookie_stoc contains \|15 A1\|` |
+//! | `not contains` | `!contains` | Check that right doesn't appear in left | `ssh.key_exchange_cookie_stoc not contains \|15 A1\|` |
 //!
 //! **Possible pitfalls involving `!=`**
 //!
