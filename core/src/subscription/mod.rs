@@ -87,8 +87,9 @@ where
             timers: Timers::new(),
         }
     }
-
-    pub fn process_packet(
+    
+    #[no_mangle]
+    pub extern "C" fn process_packet(
         &self,
         mbuf: Mbuf,
         conn_tracker: &mut ConnTracker<S::Tracked>,

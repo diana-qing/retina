@@ -1,5 +1,7 @@
 import argparse
 import time
+import subprocess
+import os
 from bcc import BPF
 
 def latency_hist(args):
@@ -33,34 +35,38 @@ def latency_hist(args):
         return 0;
     }
     """
-
-    path = f'./target/release/{args.app}'
+     
+    # path = f"/home/dq-qemu/retina-fork/retina/target/release/{args.app}"
+    path = os.path.abspath(f"./target/release/{args.app}")
     symbol = args.function
 
     b = BPF(text=bpf_program)
     b.attach_uprobe(name=path, sym_re=symbol, fn_name="trace_func_entry")
-    b.attach_uretprobe(name=path, sym_re=symbol, fn_name="trace_func_return")
+    # b.attach_uretprobe(name=path, sym_re=symbol, fn_name="trace_func_return")
     num_func_calls = b.num_open_uprobes()
-
+    
     print(f"Tracing latency of {symbol}...")
-
-    while (1):
-        try:
-            time.sleep(1)
-        except KeyboardInterrupt:
-            print(f"{symbol} was called {num_func_calls} times")
+    cmd = f"sudo env LD_LIBRARY_PATH=$LD_LIBRARY_PATH RUST_LOG=error {path} -c {args.config}"
+    p = subprocess.Popen(cmd, shell=True)
+    
+    #try:
+    #    while p.poll() is None:
+    #        time.sleep(1)
+    #except KeyboardInterrupt:
+    #    p.kill()
+    
+    print(f"{symbol} was called {num_func_calls} times")
         
-            print("Latency Histogram:")
-            dist = b.get_table("dist")
-            label = "nsecs" 
-            dist.print_log2_hist(label)
-            exit()
+    #print("Latency Histogram:")
+    #dist = b.get_table("dist")
+    #label = "nsecs" 
+    #dist.print_log2_hist(label)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('app')
-    parser.add_argument('-f', '--function')
-
+    parser.add_argument("app")
+    parser.add_argument("-f", "--function")
+    parser.add_argument("-c", "--config")
     args = parser.parse_args()
             
     latency_hist(args)
