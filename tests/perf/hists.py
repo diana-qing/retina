@@ -34,7 +34,7 @@ def latency_hist(args):
     }
     """
 
-    path = f'./target/release/{args.application}'
+    path = f'./target/release/{args.app}'
     symbol = args.function
 
     b = BPF(text=bpf_program)
@@ -58,6 +58,7 @@ def latency_hist(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('app')
     parser.add_argument('-f', '--function')
 
     args = parser.parse_args()
