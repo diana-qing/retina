@@ -35,8 +35,8 @@ def latency_hist(args):
         return 0;
     }
     """
-     
-    path = f"/home/dq-qemu/retina-fork/retina/target/release/{args.app}"
+    os.system("cd /home/dq-qemu/retina-fork/retina/target/release/")
+    path = f"./{args.app}"
     symbol = args.function
 
     print(list(BPF.get_user_addresses(path, symbol)))
