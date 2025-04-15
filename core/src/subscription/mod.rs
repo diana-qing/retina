@@ -71,6 +71,12 @@ where
     pub(crate) timers: Timers,
 }
 
+#[no_mangle]
+#[inline(never)]
+pub extern "C" fn dummy_test_func() {
+    println!("MADE IT TO DUMMY FUNC");
+}
+
 impl<S> Subscription<S>
 where
     S: Subscribable,
@@ -89,12 +95,14 @@ where
     }
     
     #[no_mangle]
+    #[inline(never)]
     pub extern "C" fn process_packet(
         &self,
         mbuf: Mbuf,
         conn_tracker: &mut ConnTracker<S::Tracked>,
         actions: Actions,
     ) {
+        dummy_test_func();
         if actions.data.intersects(ActionData::PacketContinue) {
             if let Ok(ctxt) = L4Context::new(&mbuf) {
                 match ctxt.proto {

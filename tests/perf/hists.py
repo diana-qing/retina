@@ -36,17 +36,18 @@ def latency_hist(args):
     }
     """
      
-    # path = f"/home/dq-qemu/retina-fork/retina/target/release/{args.app}"
-    path = os.path.abspath(f"./target/release/{args.app}")
+    path = f"/home/dq-qemu/retina-fork/retina/target/release/{args.app}"
     symbol = args.function
 
+    print(list(BPF.get_user_addresses(path, symbol)))
+    
     b = BPF(text=bpf_program)
-    b.attach_uprobe(name=path, sym_re=symbol, fn_name="trace_func_entry")
-    # b.attach_uretprobe(name=path, sym_re=symbol, fn_name="trace_func_return")
+    b.attach_uprobe(name=path, sym_re=symbol, fn_name="trace_func_entry", pid=-1)
+    b.attach_uretprobe(name=path, sym_re=symbol, fn_name="trace_func_return", pid=-1) 
     num_func_calls = b.num_open_uprobes()
     
-    print(f"Tracing latency of {symbol}...")
-    cmd = f"sudo env LD_LIBRARY_PATH=$LD_LIBRARY_PATH RUST_LOG=error {path} -c {args.config}"
+    ld_lib_path = "/home/dq-qemu/dpdk-21.08/lib/aarch64-linux-gnu"
+    cmd = f"sudo env LD_LIBRARY_PATH={ld_lib_path} RUST_LOG=error {path} -c {args.config}"
     p = subprocess.Popen(cmd, shell=True)
     
     #try:
