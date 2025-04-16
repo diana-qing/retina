@@ -31,12 +31,12 @@ def latency_hist(args):
         u64 delta = bpf_ktime_get_ns() - *tsp;
 
         start.delete(&pid);
-        dist.atomic_increment(bpf_log2l(delta)); // nanoseconds by default
+        dist.increment(bpf_log2l(delta)); // nanoseconds by default
         return 0;
     }
     """
-    os.system("cd /home/dq-qemu/retina-fork/retina/target/release/")
-    path = f"./{args.app}"
+    # path = f"/home/dianaq/Downloads/retina-fork/retina/target/release/{args.app}"
+    path = f"./target/release/{args.app}"
     symbol = args.function
 
     print(list(BPF.get_user_addresses(path, symbol)))
@@ -44,30 +44,32 @@ def latency_hist(args):
     b = BPF(text=bpf_program)
     b.attach_uprobe(name=path, sym_re=symbol, fn_name="trace_func_entry", pid=-1)
     b.attach_uretprobe(name=path, sym_re=symbol, fn_name="trace_func_return", pid=-1) 
-    num_func_calls = b.num_open_uprobes()
+    n_open_probes = b.num_open_uprobes()
     
-    ld_lib_path = "/home/dq-qemu/dpdk-21.08/lib/aarch64-linux-gnu"
+    ld_lib_path = "/home/dianaq/dpdk-21.08/lib/aarch64-linux-gnu"
     cmd = f"sudo env LD_LIBRARY_PATH={ld_lib_path} RUST_LOG=error {path} -c {args.config}"
     p = subprocess.Popen(cmd, shell=True)
     
-    #try:
-    #    while p.poll() is None:
-    #        time.sleep(1)
-    #except KeyboardInterrupt:
-    #    p.kill()
+    try:
+       while p.poll() is None:
+           time.sleep(1)
+    except KeyboardInterrupt:
+       p.kill()
     
+    dist = b.get_table("dist")
+    num_func_calls = sum(count.value for count in dist.values())
     print(f"{symbol} was called {num_func_calls} times")
         
-    #print("Latency Histogram:")
-    #dist = b.get_table("dist")
-    #label = "nsecs" 
-    #dist.print_log2_hist(label)
+    print("Latency Histogram:")
+    label = "nsecs" 
+    dist.print_log2_hist(label)
+    dist.clear()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("app")
     parser.add_argument("-f", "--function")
-    parser.add_argument("-c", "--config")
+    parser.add_argument("-c", "--config", default="./configs/offline.toml")
     args = parser.parse_args()
             
     latency_hist(args)
