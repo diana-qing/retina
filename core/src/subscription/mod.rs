@@ -88,9 +88,7 @@ where
         }
     }
     
-    #[no_mangle]
-    #[inline(never)]
-    pub extern "C" fn process_packet(
+    pub fn process_packet(
         &self,
         mbuf: Mbuf,
         conn_tracker: &mut ConnTracker<S::Tracked>,
