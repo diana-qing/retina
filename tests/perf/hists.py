@@ -8,12 +8,24 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import ctypes
 
+class Data(ctypes.Structure):
+    _fields_ = [
+        ("pid", ctypes.c_uint),
+        ("latency", ctypes.c_ulonglong),
+    ]
+
 def latency_hist(args):
     bpf_program = """
     #include <uapi/linux/ptrace.h>
 
+    struct data_t {
+        u32 pid;
+        u64 latency;
+    };
+
     BPF_HISTOGRAM(dist);
     BPF_HASH(start, u32);
+    BPF_PERF_OUTPUT(latencies);
 
     int trace_func_entry(struct pt_regs *ctx)
     {
@@ -23,7 +35,7 @@ def latency_hist(args):
         return 0;
     }
 
-    int trace_func_return(struct pt_regs *ctx)
+    int trace_func_exit(struct pt_regs *ctx)
     {
         u32 pid = bpf_get_current_pid_tgid();
 
@@ -35,8 +47,14 @@ def latency_hist(args):
         u64 delta = bpf_ktime_get_ns() - *tsp;
         TIMING_UNIT
 
-        start.delete(&pid);
+        struct data_t data = {};
+        data.pid = pid;
+        data.latency = delta;
+        latencies.perf_submit(ctx, &data, sizeof(data));
+
         dist.increment(bpf_log2l(delta));
+        start.delete(&pid);
+
         return 0;
     }
     """
@@ -66,19 +84,25 @@ def latency_hist(args):
     b = BPF(text=bpf_program)
     try:
         b.attach_uprobe(name=path, sym=mangled_name, fn_name="trace_func_entry", pid=-1)
-        b.attach_uretprobe(name=path, sym=mangled_name, fn_name="trace_func_return", pid=-1) 
+        b.attach_uretprobe(name=path, sym=mangled_name, fn_name="trace_func_exit", pid=-1) 
     except Exception as e:
         print(f"Failed to attach uprobes: {e}")
 
     n_open_probes = b.num_open_uprobes()
     
+    latencies = []
+    def print_event(cpu, data, size):
+        event = b["latencies"].event(data) 
+        latencies.append(event.latency)
+    b["latencies"].open_perf_buffer(print_event)
+
     ld_lib_path = "/home/dianaq/dpdk-21.08/lib/aarch64-linux-gnu"
     cmd = f"sudo env LD_LIBRARY_PATH={ld_lib_path} RUST_LOG=error {path} -c {args.config}"
     p2 = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     
     try:
        while p2.poll() is None:
-           time.sleep(1)
+           b.perf_buffer_poll(timeout=1000)
     except KeyboardInterrupt:
        p2.kill()
     
@@ -86,33 +110,22 @@ def latency_hist(args):
     num_func_calls = sum(count.value for count in dist.values())
     print(f"{args.function} was called {num_func_calls} times")
 
-    if args.plot:
-        bins = []
-        counts = []
-        for k, v in dist.items():
-            bin = k.value
-            count = v.value
-            bins.append(1 << bin)  # Convert back from log2 to actual value
-            # bins.append(bin) 
-            counts.append(count)
-        
-        print('bins:', bins)
-        print('counts:', counts)
+    print("Latency Histogram:")
+    dist.print_log2_hist(label)
 
+    if args.plot:
         plt.figure(figsize=(10, 6))
-        plt.bar(bins, counts, align="center")
-        # plt.xscale('log', basex=2)
+
+        plt.hist(latencies, bins=20)
         plt.xlabel(f"Latency ({label})")
         plt.ylabel("Count")
-        plt.title(f"Distribution of {args.function} latency when running {args.app}")
+        plt.title(f"Distribution of latencies for {args.function} when running {args.app}")
         plt.grid(True, ls="--")
         
         figs_dir = "./tests/perf/figs"
         os.makedirs(figs_dir, exist_ok=True)
         plt.savefig(os.path.join(figs_dir, f"{args.app}_{args.function}_latency.png"), dpi=300, bbox_inches='tight')
     
-    print("Latency Histogram:")
-    dist.print_log2_hist(label)
     dist.clear()
 
 if __name__ == "__main__":
