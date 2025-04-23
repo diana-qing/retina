@@ -104,7 +104,7 @@ def latency_hist(args):
         # plt.xscale('log', basex=2)
         plt.xlabel(f"Latency ({label})")
         plt.ylabel("Count")
-        plt.title(f"{args.function}")
+        plt.title(f"Distribution of {args.function} latency when running {args.app}")
         plt.grid(True, ls="--")
         
         figs_dir = "./tests/perf/figs"
