@@ -109,7 +109,7 @@ def latency_hist(args):
         
         figs_dir = "./tests/perf/figs"
         os.makedirs(figs_dir, exist_ok=True)
-        plt.savefig(os.path.join(figs_dir, f"{args.function}_latency_hist.png"), dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(figs_dir, f"{args.app}_{args.function}_latency.png"), dpi=300, bbox_inches='tight')
     
     print("Latency Histogram:")
     dist.print_log2_hist(label)
