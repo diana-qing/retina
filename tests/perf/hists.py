@@ -3,6 +3,7 @@ import time
 import subprocess
 import os
 from bcc import BPF
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -65,8 +66,11 @@ def latency_hist(args):
         bpf_program = bpf_program.replace('TIMING_UNIT', '')
         label = "nsecs" 
 
-    # path = f"/home/dianaq/Downloads/retina-fork/retina/target/release/{args.app}"
-    path = f"./target/release/{args.app}"
+    # p00 = subprocess.run("cargo clean", shell=True, capture_output=True, text=True)
+    # compile_cmd = f"cargo build --bin {args.app} --features timing"
+    # p0 = subprocess.run(compile_cmd, shell=True, capture_output=True, text=True)
+    # path = f"/home/dianaq/Downloads/retina-fork/retina/target/debug/{args.app}"
+    path = f"./target/debug/{args.app}"
 
     # get the mangled function name to pass into attach_uprobe() and attach_uretprobe()
     # TODO: what if different modules have funcs with the same name
@@ -97,8 +101,8 @@ def latency_hist(args):
     b["latencies"].open_perf_buffer(print_event)
 
     ld_lib_path = "/home/dianaq/dpdk-21.08/lib/aarch64-linux-gnu"
-    cmd = f"sudo env LD_LIBRARY_PATH={ld_lib_path} RUST_LOG=error {path} -c {args.config}"
-    p2 = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    cmd = f"sudo env LD_LIBRARY_PATH={ld_lib_path} RUST_LOG=error {path} -c {args.config} --features timing"
+    p2 = subprocess.Popen(cmd, shell=True) # stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     
     try:
        while p2.poll() is None:
@@ -113,20 +117,37 @@ def latency_hist(args):
     print("Latency Histogram:")
     dist.print_log2_hist(label)
 
-    if args.plot:
-        plt.figure(figsize=(10, 6))
+    print("\nLatency Stats:")
+    print_latency_stats(latencies, label)
 
-        plt.hist(latencies, bins=20)
-        plt.xlabel(f"Latency ({label})")
-        plt.ylabel("Count")
-        plt.title(f"Distribution of latencies for {args.function} when running {args.app}")
-        plt.grid(True, ls="--")
-        
-        figs_dir = "./tests/perf/figs"
-        os.makedirs(figs_dir, exist_ok=True)
-        plt.savefig(os.path.join(figs_dir, f"{args.app}_{args.function}_latency.png"), dpi=300, bbox_inches='tight')
+    if args.plot:
+        plot_latency_hist(latencies, label, args.function, args.app)
     
     dist.clear()
+
+def print_latency_stats(latencies, label):
+    avg = np.mean(latencies)
+    percentile25 = np.percentile(latencies, 25)
+    median = np.median(latencies)
+    percentile75 = np.percentile(latencies, 75)
+    percentile95 = np.percentile(latencies, 95)
+    print(f"Average: {avg} {label}")
+    print(f"25th percentile: {percentile25} {label}")
+    print(f"Median: {median} {label}")
+    print(f"75th percentile: {percentile75} {label}")
+    print(f"95th percentile: {percentile95} {label}\n")
+
+def plot_latency_hist(latencies, label, func, app):
+    plt.figure(figsize=(10, 6))
+    plt.hist(latencies, bins=20)
+    plt.xlabel(f"Latency ({label})")
+    plt.ylabel("Count")
+    plt.title(f"Distribution of latencies for {args.function}() when running {args.app}")
+    plt.grid(True, ls="--")
+    
+    figs_dir = "./tests/perf/figs"
+    os.makedirs(figs_dir, exist_ok=True)
+    plt.savefig(os.path.join(figs_dir, f"{args.app}_{args.function}_latency.png"), dpi=300, bbox_inches='tight')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

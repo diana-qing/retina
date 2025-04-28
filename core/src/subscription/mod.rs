@@ -94,6 +94,8 @@ where
         conn_tracker: &mut ConnTracker<S::Tracked>,
         actions: Actions,
     ) {
+        tsc_start!(start);
+
         if actions.data.intersects(ActionData::PacketContinue) {
             if let Ok(ctxt) = L4Context::new(&mbuf) {
                 match ctxt.proto {
@@ -110,6 +112,10 @@ where
                 conn_tracker.process(mbuf, ctxt, self);
             }
         }
+
+        // let tsc_hz = unsafe { crate::dpdk::rte_get_tsc_hz() };
+        // println!("{}", tsc_hz);
+        tsc_record!(self.timers, "process", start);
     }
 
     // TODO: packet continue filter should ideally be built at
@@ -155,3 +161,8 @@ where
         (self.conn_deliver)(conn_data, tracked)
     }
 }
+
+// fn record_global_timer(which: &str, value: u64, sample: u64) {
+//     let mut timers = GLOBAL_TIMERS.lock().unwrap();
+//     timers.record(which, value, sample);
+// }
