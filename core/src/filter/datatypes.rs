@@ -509,11 +509,13 @@ impl SubscriptionSpec {
 
     // Actions for PacketFilter stage
     pub(crate) fn packet_filter(&self) -> MatchingActions {
+        // tsc_start!(start);
         let mut actions = MatchingActions::new();
         for datatype in &self.datatypes {
             actions.push(&datatype.packet_filter(&self.level));
         }
         actions.if_matching.data |= ActionData::ProtoFilter;
+        // tsc_record!(self.timers, "process", start);
         actions
     }
 

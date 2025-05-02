@@ -61,6 +61,7 @@ impl TimerWheel {
         subscription: &Subscription<T::Subscribed>,
         now: Instant,
     ) {
+        // tsc_start!(start);
         let table_len = table.len();
         if now - self.prev_ts >= self.period {
             self.prev_ts = now;
@@ -72,6 +73,9 @@ impl TimerWheel {
             );
             log::debug!("new table size: {}", table.len());
         }
+        // let tsc_hz = unsafe { crate::dpdk::rte_get_tsc_hz() };
+        // println!("{}", tsc_hz);
+        // tsc_record!(subscription.timers, "remove_inactive", start);
     }
 
     /// Removes connections that have been inactive for at least their inactivity window time

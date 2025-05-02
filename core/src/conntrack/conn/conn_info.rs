@@ -44,9 +44,13 @@ where
         pdu: &L4Pdu,
         subscription: &Subscription<T::Subscribed>,
     ) {
+        tsc_start!(start);
         assert!(self.actions.drop());
+
         let pkt_actions = subscription.filter_packet(pdu.mbuf_ref(), &self.sdata);
+
         self.actions = pkt_actions;
+        tsc_record!(subscription.timers, "packet_filter", start);
     }
 
     #[inline]
@@ -98,6 +102,7 @@ where
         subscription: &Subscription<T::Subscribed>,
         registry: &ParserRegistry,
     ) {
+        tsc_start!(start);
         // In probing stage: application-layer protocol unknown
         if self.actions.session_probe() {
             self.on_probe(pdu, subscription, registry);
@@ -107,6 +112,7 @@ where
         if self.actions.session_parse() {
             self.on_parse(pdu, subscription);
         }
+        tsc_record!(subscription.timers, "applayer_parse", start);
     }
 
     fn on_probe(

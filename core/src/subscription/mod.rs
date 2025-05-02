@@ -161,8 +161,3 @@ where
         (self.conn_deliver)(conn_data, tracked)
     }
 }
-
-// fn record_global_timer(which: &str, value: u64, sample: u64) {
-//     let mut timers = GLOBAL_TIMERS.lock().unwrap();
-//     timers.record(which, value, sample);
-// }
