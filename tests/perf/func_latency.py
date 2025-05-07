@@ -99,20 +99,22 @@ def latency_hist(args):
 
     # path = f"/home/dianaq/Downloads/retina-fork/retina/target/debug/{args.app}"
     # path = f"./target/debug/{args.app}"
+    binary = os.environ["BINARY"]
 
     funcs = []
     # get the mangled function name to pass into attach_uprobe() and attach_uretprobe()
     # TODO: what if different modules have funcs with the same name
     for func in args.functions:
-        get_mangled_name_cmd = f"nm {args.executable} | grep {func} | awk '{{print $3}}'"
+        get_mangled_name_cmd = f"nm {binary} | grep {func} | awk '{{print $3}}'"
         p1 = subprocess.run(get_mangled_name_cmd, shell=True, capture_output=True, text=True)
         mangled_name = p1.stdout.strip()
 
         if not mangled_name:
             print(f"{func} is never called.")
+            continue
         
         # print('mangled_name:', mangled_name)
-        # print('address:', BPF.get_user_addresses(args.executable, mangled_name))
+        # print('address:', BPF.get_user_addresses(binary, mangled_name))
         funcs.append(mangled_name)
 
     # no functions to profile 
@@ -126,8 +128,8 @@ def latency_hist(args):
             func_id = i + 1
             entry_func = f"trace_func_{func_id}_entry"
             exit_func = f"trace_func_{func_id}_exit"
-            b.attach_uprobe(name=args.executable, sym=func_mangled_name, fn_name=entry_func, pid=-1)
-            b.attach_uretprobe(name=args.executable, sym=func_mangled_name, fn_name=exit_func, pid=-1) 
+            b.attach_uprobe(name=binary, sym=func_mangled_name, fn_name=entry_func, pid=-1)
+            b.attach_uretprobe(name=binary, sym=func_mangled_name, fn_name=exit_func, pid=-1) 
         except Exception as e:
             print(f"Failed to attach uprobes: {e}")
 
@@ -146,7 +148,8 @@ def latency_hist(args):
         FUNCS_AND_HISTS[event.func_id].record_value(event.latency)
     b["latencies"].open_perf_buffer(handle_event)
 
-    cmd = f"sudo env LD_LIBRARY_PATH={args.ld_library_path} RUST_LOG=error {args.executable} -c {args.config}"
+    ld_library_path = os.environ["LD_LIBRARY_PATH"]
+    cmd = f"sudo env LD_LIBRARY_PATH={ld_library_path} RUST_LOG=error {binary} -c {args.config}"
     p2 = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     try:
@@ -226,8 +229,6 @@ def comma_sep_list(value):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("app")
-    parser.add_argument('ld_library_path')
-    parser.add_argument('executable')
     parser.add_argument("-c", "--config", default="./configs/offline.toml")
     parser.add_argument("-f", "--functions", type=comma_sep_list)
     parser.add_argument("-u", "--microseconds", action="store_true")
